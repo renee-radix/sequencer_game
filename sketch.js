@@ -1,6 +1,6 @@
 let osc, envelope; 
 let noteVals = [57, 59, 62, 64, 67, 69], noteAmt = 6; 
-let size;
+let size, seqSize, seqStart;
 let noteCircles = [];
 let noteColor;
 
@@ -35,7 +35,7 @@ function draw() {
   
   strokeWeight(3);
   stroke(100);
-  // Maybe it makes most sense to construct the sequencer out of a 2d array of rectangles, maybe 12 (6 for notes, 6 for drum sounds)*16 (beats)? 
+
   for(let i = 0; i < 16; i++){
     for(let j = 0; j < 12; j++){
       if(j < 6){
@@ -47,11 +47,24 @@ function draw() {
     }
   }
   fill(0);
-  rect(50, 50, seqSize, seqSize);
+  stroke(50);
+  strokeWeight(4);
+  line(width/4.05, height/100, width/4.05, height/1.32);
+  line(width/2.01, height/100, width/2.01, height/1.32);
+  line(width/1.338, height/100, width/1.338, height/1.32);
+
+  // I should make this sequencer a class but this is the idea of what I want for a highlighted square
+  stroke(230);
+  strokeWeight(8);
+  noFill();
+  square(seqStart.x-seqSize, seqStart.y-30, 25, 10);
 }
 
 function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
+}
+
+class sequencerSquare{ //Create a class here for the sequencer squares, I think we'll need it if we're going to have playback
 }
 
 class noteCircle{
