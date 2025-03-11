@@ -3,6 +3,7 @@ let circSize, seqSize, seqStart;
 let noteCircles = [];
 let noteColor;
 let started = false;
+let seqSquares = [];
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -16,27 +17,27 @@ function setup() {
   for(let i = 0; i < noteAmt; i++){
     noteCircles.push(new noteCircle(spacing * (i + 0.5), height/1.1, noteVals[i]))
   }
+
+
+  for(let i = 0; i < 16; i++){
+    for(let j = 0; j < 10; j++){
+      seqSquares.push(new sequencerSquare (((seqStart.x * i) + seqSize/4) - width/110, (seqStart.y * j) + seqSize/4, i, j))
+    }
+  }
 }
 
 function draw() {
   background(220);
   noStroke();
   noteCircles.forEach((element) => element.run());
-  colorMode(RGB);
   
   strokeWeight(3);
   stroke(100);
 
-  for(let i = 0; i < 16; i++){
-    for(let j = 0; j < 10; j++){
-      if(j < 6){
-        fill(120, 220, 225);
-      }else{
-        fill(120, 225, 150);
-      }
-      rect(((seqStart.x * i) + seqSize/4) - width/110, (seqStart.y * j) + seqSize/4, seqSize, seqSize);
-    }
+  for (let square of seqSquares){
+    square.display();
   }
+
   fill(0);
   stroke(50);
   strokeWeight(4);
@@ -45,10 +46,10 @@ function draw() {
   line(width/1.338, height/100, width/1.338, height/1.5);
 
   // I should make this sequencer a class but this is the idea of what I want for a highlighted square
-  stroke(230);
-  strokeWeight(8);
-  noFill();
-  square(seqStart.x-seqSize, seqStart.y-30, 25, 10);
+  // stroke(230);
+  // strokeWeight(8);
+  // noFill();
+  // square(seqStart.x-seqSize, seqStart.y-30, 25, 10);
 }
 
 function windowResized(){
@@ -57,10 +58,22 @@ function windowResized(){
 
 
 
-class sequencerSquare{ //Create a class here for the sequencer squares, I think we'll need it if we're going to have playback
-  constructor(x, y){
+class sequencerSquare{ 
+  constructor(x, y, i, j){
     this.position = createVector(x, y);
-    //this.size 
+    this.size = seqSize; 
+    this.index = createVector(i, j);
+    if(this.index.y < 6){
+      this.fill = color('aqua');
+    }else{
+      this.fill = color('aquamarine');
+    }
+  }
+
+  display(){
+    colorMode(RGB);
+    fill(this.fill);
+    rect(this.position.x, this.position.y, this.size, this.size);
   }
 }
 
