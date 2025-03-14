@@ -1,5 +1,5 @@
 let noteVals = [57, 59, 62, 64, 67, 69], noteAmt = 6; 
-let circSize, seqSize, seqStart, spacing;
+let circSize, seqSizeX, seqSizeY, seqStart, spacing;
 let noteCircles = [], noteColor;
 let started = false;
 let seqSquares = [], seqHighlights = [], seqOn = true;
@@ -27,7 +27,8 @@ function setup() {
   // Currently these are created depending on the width or height, which works fine when the screen is half and half with VS code
   // but in other situations does not work ok. We should probably figure this out but thinking about it is giving me a headache. 
   circSize = height/8;
-  seqSize = width/20;
+  seqSizeX = width/20;
+  seqSizeY = height/20;
   seqStart = createVector(width/16, height/16);
   
   noteColor = random(0, 360);
@@ -40,12 +41,12 @@ function setup() {
 
   for(let i = 0; i < 16; i++){
     for(let j = 0; j < 10; j++){
-      seqSquares.push(new sequencerSquare (((seqStart.x * i) + seqSize/4) - width/110, (seqStart.y * j) + seqSize/4, i, j))
+      seqSquares.push(new sequencerSquare (((seqStart.x * i) + seqSizeX/4) - width/110, (seqStart.y * j) + seqSizeY/4, i, j))
     }
   }
 
   for(let i = 0; i < 16; i++){
-    seqHighlights.push(new sequencerHighlight(i, seqSize, seqSize * 13));
+    seqHighlights.push(new sequencerHighlight(i, seqSizeX, seqSizeY * 13));
   }
 }
 
@@ -177,6 +178,20 @@ function mouseReleased(){
     element.position.y = element.originalPosition.y;
     element.dragged = false;
   })
+
+  // I can't get this code to run when I double click, frustratingly
+  function doubleClicked(){
+    for (let square of seqSquares){
+      let squareRightSide = square.position.x + seqSizeX;
+      let squareBottomSide = square.position.y + seqSizeY;
+      // if the mouse is inside the square when it's double clicked that square loses its note
+      if(mouseX >= square.position.x && mouseX <= squareRightSide
+        && mouseY >= square.position.y && mouseY <= squareBottomSide){
+          square.containsNote = false;
+        }
+    }
+    console.log("double clicked!");
+  }
 
 
   for(let column of seqHighlights){
