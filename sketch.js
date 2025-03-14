@@ -1,12 +1,10 @@
 let noteVals = [57, 59, 62, 64, 67, 69], noteAmt = 6; 
-let circSize, seqSize, seqStart;
-let noteCircles = [];
-let noteColor;
+let circSize, seqSize, seqStart, spacing;
+let noteCircles = [], noteColor;
 let started = false;
-let seqSquares = [], seqHighlights = [];
-let spacing;
-
+let seqSquares = [], seqHighlights = [], seqOn = true;
 let bg;
+let time, previousTime = 0, interval, blink = false, milliseconds = 500, metIndex = 0;
 
 function preload(){
   bg = loadImage('wavy_lines.jpg')
@@ -42,9 +40,10 @@ function setup() {
 
 function draw() {
   background(bg);
-
-  strokeWeight(3);
-  stroke(100);
+  
+  time = millis();
+  timeCheck(milliseconds);
+  metronome(); 
 
   for (let square of seqSquares){
     square.display();
@@ -57,6 +56,18 @@ function draw() {
   line(width/4.05, height/100, width/4.05, height/1.5);
   line(width/2.01, height/100, width/2.01, height/1.5);
   line(width/1.338, height/100, width/1.338, height/1.5);
+
+  for (let i = 0; i < seqHighlights.length; i++){
+    let checker = metIndex - 1;
+    if (i == checker){
+      seqHighlights[i].visible = true;
+    }else{
+      seqHighlights[i].visible = false;
+    }
+    // I would also want a sequencing boolean that you turn on 
+    // so as not to break the behaviour that highlights it when you hover over it with a circle
+    // but I'd need to make a button for that
+  }
 
   seqHighlights.forEach((element) => element.display());
   noteCircles.forEach((element) => element.run());
@@ -99,6 +110,8 @@ class sequencerSquare{
   display(){
     colorMode(RGB);
     fill(this.fill);
+    strokeWeight(3);
+    stroke(100);
     square(this.position.x, this.position.y, this.size);
 
     if (this.containsNote == true && this.index.y < 6){
@@ -238,9 +251,25 @@ function mouseReleased(){
   }
 }
 
+function timeCheck(interval){
+  if (time - previousTime >= interval){
+    blink = true; 
+    previousTime = time;
+  }
+}
+
+function metronome(){
+  if (metIndex > 16){
+    metIndex = 1;
+  }
+  if (blink == true){
+    metIndex++;
+    console.log(metIndex);
+    blink = false;
+    //If I get rid of the circle code below I'd want to write here blink = false
+  }
+}
+
 /* 
-Moira: Next steps:
-- Give sequencer squares some kind of value that registers if it has a note in there or not 
-(I like the idea that each square has a fixed value and it's either on or off, might be kinda complicated to get the different colors from the different users)
 
 */
