@@ -4,14 +4,25 @@ let noteCircles = [], noteColor;
 let started = false;
 let seqSquares = [], seqHighlights = [], seqOn = true;
 let bg;
-let time, previousTime = 0, interval, blink = false, milliseconds = 500, metIndex = 0;
+let time, previousTime = 0, interval, blink = false, milliseconds = 500, metIndex = 0, sequencing = false;
+let sequencerButton, sequencerSlider;
 
 function preload(){
   bg = loadImage('wavy_lines.jpg')
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  bg.resize(width,height);
+  bg.resize(width, height);
+
+  sequencerButton = createButton('Start/stop sequencer');
+  sequencerButton.position(width/1.2, height/1.5);
+  sequencerButton.mouseClicked(toggleSequencer);
+  
+
+  sequencerSlider = createSlider(60, 200);
+  sequencerSlider.position(width/2.3, height/1.3);
+  sequencerSlider.size(80);
+
 
   // Currently these are created depending on the width or height, which works fine when the screen is half and half with VS code
   // but in other situations does not work ok. We should probably figure this out but thinking about it is giving me a headache. 
@@ -40,6 +51,15 @@ function setup() {
 
 function draw() {
   background(bg);
+
+  let bpm = sequencerSlider.value();
+  console.log(bpm);
+  textSize(32);
+  fill(0);
+  text(bpm + ' BPM', width/2.4, height/1.35);
+  bpmConverter(bpm);
+  
+
   
   time = millis();
   timeCheck(milliseconds);
@@ -57,22 +77,32 @@ function draw() {
   line(width/2.01, height/100, width/2.01, height/1.5);
   line(width/1.338, height/100, width/1.338, height/1.5);
 
-  for (let i = 0; i < seqHighlights.length; i++){
-    let checker = metIndex - 1;
-    if (i == checker){
-      seqHighlights[i].visible = true;
-    }else{
-      seqHighlights[i].visible = false;
+  if (sequencing == true) {
+    for (let i = 0; i < seqHighlights.length; i++){
+      let checker = metIndex - 1;
+      if (i == checker){
+        seqHighlights[i].visible = true;
+      }else{
+        seqHighlights[i].visible = false;
+      }
     }
-    // I would also want a sequencing boolean that you turn on 
-    // so as not to break the behaviour that highlights it when you hover over it with a circle
-    // but I'd need to make a button for that
   }
 
   seqHighlights.forEach((element) => element.display());
   noteCircles.forEach((element) => element.run());
 
-
+  // Code to make the sequencer play back, essentially "If the sequencer is going cycle through all the squares of the highlighted column and play whatever one has a note"
+  if(sequencing == true){
+    for (let i = 0; i < seqSquares.length; i++){
+      if(seqSquares[i].index.x == (metIndex - 1) && seqSquares[i].containsNote == true){
+        for(let j = 0; j < noteCircles.length; j++){
+        if(5- seqSquares[i].index.y == j){
+          noteCircles[j].oscilator.play();
+          }
+        }
+      }
+    }
+  }
 }
 
 function windowResized(){
@@ -133,7 +163,6 @@ class noteCircle{
     this.brightness = map(x, 0, width, 20, 100);
     colorMode(HSB);
     this.fill = color(noteColor, 100, this.brightness);
-    //this.freqVal = midiToFreq(note);
     this.oscilator = new noteOscilator(note);
     this.dragged = false;
   }
@@ -270,6 +299,22 @@ function metronome(){
   }
 }
 
-/* 
+function toggleSequencer(){
+  if (sequencing == true){
+    sequencing = false;
+  }else{
+    sequencing = true;
+    metIndex = 1;
+  }
+}
 
+function bpmConverter(number){
+  milliseconds = (60000 / (number * 4));
+}
+
+/* 
+Current bugs:
+- Main priority: making it so it works on a variety of different window sizes because right now it looks like shit on anything except side by side mode
+
+- You can't edit it on the fly because of the way the highlighting works. I could probably patch it out pretty well
 */
