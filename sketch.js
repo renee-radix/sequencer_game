@@ -121,102 +121,6 @@ function windowResized(){
 
 }
 
-
-
-class sequencerSquare{ 
-  constructor(x, y, i, j){
-    this.position = createVector(x, y);
-    this.size = seqSize; 
-    this.index = createVector(i, j); // the idea is that this gives us a column (0-15) and row (0-10) number
-    if(this.index.y < 6){
-      this.fill = color('aqua');
-    }else{
-      this.fill = color('aquamarine');
-    }
-    this.selected = false;
-    this.containsNote = false;
-  }
-
-  display(){
-    colorMode(RGB);
-    fill(this.fill);
-    strokeWeight(3);
-    stroke(100);
-    square(this.position.x, this.position.y, this.size);
-
-    if (this.containsNote == true && this.index.y < 6){
-      ellipseMode(CORNER);
-      let circleOffset = this.size/7;
-      noStroke();
-      colorMode(HSB);
-      fill(noteColor, 100, noteCircles[5 - this.index.y].brightness);
-      ellipse(this.position.x + circleOffset, this.position.y + circleOffset, this.size/1.5, this.size/1.5)
-    }
-  }
-}
-
-class noteCircle{
-  constructor(x, y, note){
-    this.size = circSize;
-    this.position = createVector(x, y);
-    this.originalPosition = createVector(this.position.x, this.position.y);
-    this.brightness = map(x, 0, width, 20, 100);
-    colorMode(HSB);
-    this.fill = color(noteColor, 100, this.brightness);
-    this.oscilator = new noteOscilator(note);
-    this.dragged = false;
-  }
-
-  run(){
-    noStroke();
-    fill(this.fill); 
-    ellipseMode(CENTER);
-    ellipse(this.position.x, this.position.y, this.size, this.size);
-  }
-}
-
-class noteOscilator{
-  constructor(noteVal){
-    this.noteVal = midiToFreq(noteVal);
-    this.oscilator = new p5.SinOsc;
-    this.oscilator.amp(0);
-    this.oscilator.freq(this.noteVal);
-    this.env = new noteEnvelope();
-  }
-
-  play(){
-    this.env.envelope.play(this.oscilator);
-  }
-}
-
-class sequencerHighlight{
-  // These are highlights that are meant to be on top of the sequencer when either a circle is hovering over the top or it's playing through it
-  constructor(i, w, h){
-    this.position = createVector(seqSquares[i * 10].position.x, seqSquares[0].position.y - (seqSize / 3.5)); // This will be the start point for the highlight (top X Y corner). i is the index that it gets fed, a number from 0 to 15
-    this.size = createVector(seqSize, seqSize * 13); // Width and height of the hightlight, stored in a vector for convenience (it will probably need to be destroyed and reformed again under window resize to make it all fit correctly)
-    this.visible = false;
-  }
-
-  display(){
-    if (this.visible == true){
-      stroke(0, 150);
-      strokeWeight(4);
-      noFill();
-      rect(this.position.x, this.position.y, this.size.x, this.size.y, 20);
-    }
-  }
-}
-
-
-
-class noteEnvelope{
-  constructor(){
-  this.envelope = new p5.Env();
-  this.envelope.setADSR(0.001, 0.5, 0.2, 0.5);
-  this.envelope.setRange(1, 0);
-  }
-}
-
 function mousePressed(){
   for(let i = 0; i < noteCircles.length; i++){
     if (started == false){
@@ -295,7 +199,6 @@ function metronome(){
     metIndex++;
     console.log(metIndex);
     blink = false;
-    //If I get rid of the circle code below I'd want to write here blink = false
   }
 }
 
@@ -315,6 +218,12 @@ function bpmConverter(number){
 /* 
 Current bugs:
 - Main priority: making it so it works on a variety of different window sizes because right now it looks like shit on anything except side by side mode
+Start by making the sizing of the sequencer squares and highlights work a little better, that's 90% of it
+
+
 
 - You can't edit it on the fly because of the way the highlighting works. I could probably patch it out pretty well
+
+Features I could add:
+- Drum samples for the lower 4 (kick, snare, hi hat and cymbol)
 */
