@@ -1,6 +1,6 @@
-
 // global variables
 let noteVals = [57, 59, 62, 64, 67, 69], noteAmt = 6; 
+let kick, hat, snare, cymbol;
 let circSize, seqSizeX, seqSizeY, seqStart, spacing;
 let noteCircles = [], noteColor;
 let started = false;
@@ -12,6 +12,10 @@ let sequencerButton, sequencerSlider;
 //loading the background
 function preload(){
   bg = loadImage('wavy_lines.jpg')
+  kick = loadSound('/assets/kick.aiff');
+  hat = loadSound('/assets/hat.aiff');
+  snare = loadSound('/assets/snare.aiff');
+  cymbol = loadSound('/assets/cymbol.aiff');
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -116,7 +120,7 @@ function windowResized(){
     noteCircles.push(new noteCircle(spacing * (i + 0.5), height/1.1, noteVals[i]));
   }
 
-  background.resize(width, height);
+  bg.resize(width, height);
 
   // If I want to do this for the whole project I'd have to redraw the serquencer and reinitialize the values also, which is doable but would just take some time. 
 
