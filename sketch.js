@@ -1,3 +1,5 @@
+
+// global variables
 let noteVals = [57, 59, 62, 64, 67, 69], noteAmt = 6; 
 let circSize, seqSizeX, seqSizeY, seqStart, spacing;
 let noteCircles = [], noteColor;
@@ -7,6 +9,7 @@ let bg;
 let time, previousTime = 0, interval, blink = false, milliseconds = 500, metIndex = 0, sequencing = false;
 let sequencerButton, sequencerSlider;
 
+//loading the background
 function preload(){
   bg = loadImage('wavy_lines.jpg')
 }
@@ -14,18 +17,17 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   bg.resize(width, height);
 
+  // creating buttons/sliders
   sequencerButton = createButton('Start/stop sequencer');
   sequencerButton.position(width/1.2, height/1.5);
   sequencerButton.mouseClicked(toggleSequencer);
-  
 
   sequencerSlider = createSlider(60, 200);
   sequencerSlider.position(width/2.3, height/1.3);
   sequencerSlider.size(80);
 
 
-  // Currently these are created depending on the width or height, which works fine when the screen is half and half with VS code
-  // but in other situations does not work ok. We should probably figure this out but thinking about it is giving me a headache. 
+  //Sets the sizes for the various elements, will probably want these to change in the resize method. If things look weird start by changing here
   circSize = height/8;
   seqSizeX = width/20;
   seqSizeY = height/20;
@@ -33,18 +35,16 @@ function setup() {
   
   noteColor = random(0, 360);
 
+  // initializing arrays
   spacing = (width / 6);
   for(let i = 0; i < noteAmt; i++){
     noteCircles.push(new noteCircle(spacing * (i + 0.5), height/1.1, noteVals[i]))
   }
-
-
   for(let i = 0; i < 16; i++){
     for(let j = 0; j < 10; j++){
       seqSquares.push(new sequencerSquare (((seqStart.x * i) + seqSizeX/4) - width/110, (seqStart.y * j) + seqSizeY/4, i, j))
     }
   }
-
   for(let i = 0; i < 16; i++){
     seqHighlights.push(new sequencerHighlight(i, seqSizeX, seqSizeY * 13));
   }
@@ -233,12 +233,14 @@ function bpmConverter(number){
 /* 
 Current bugs:
 - Main priority: making it so it works on a variety of different window sizes because right now it looks like shit on anything except side by side mode
-Start by making the sizing of the sequencer squares and highlights work a little better, that's 90% of it
-
-
+Start by making the sizing of the sequencer squares and highlights work a little better, that's 90% of it. They work good enough but they look a little ugly sometimes. 
+- If we want it to be resizable we'd just need to recall some of the global variable setting in the resize method. 
 
 - You can't edit it on the fly because of the way the highlighting works. I could probably patch it out pretty well
 
+
 Features I could add:
 - Drum samples for the lower 4 (kick, snare, hi hat and cymbol)
+https://editor.p5js.org/p5/sketches/Sound:_Load_and_Play_Sound
+- A button to erase all the notes (shouldn't be that hard to add)
 */
