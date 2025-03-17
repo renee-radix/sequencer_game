@@ -1,25 +1,29 @@
 // global variables
 let noteVals = [57, 59, 62, 64, 67, 69], noteAmt = 6; 
-let kick, hat, snare, cymbol;
+let kick, hat, snare, cymbol, drumSpacing, drumCircles = [], soundArray = [];
 let circSize, seqSizeX, seqSizeY, seqStart, spacing;
 let noteCircles = [], noteColor;
 let started = false;
 let seqSquares = [], seqHighlights = [], seqOn = true;
 let bg;
 let time, previousTime = 0, interval, blink = false, milliseconds = 500, metIndex = 0, sequencing = false;
-let sequencerButton, sequencerSlider;
+let sequencerButton, sequencerSlider, resetButton, drumButton;
+let noteMode = 2; // 1 for the notes, 2 for the drum sounds
+let newSquare = true;
 
 //loading the background
 function preload(){
   bg = loadImage('wavy_lines.jpg')
-  kick = loadSound('/assets/kick.aiff');
-  hat = loadSound('/assets/hat.aiff');
-  snare = loadSound('/assets/snare.aiff');
-  cymbol = loadSound('/assets/cymbol.aiff');
+  kick = loadSound('/assets/kick.mp3');
+  hat = loadSound('/assets/hat.mp3');
+  snare = loadSound('/assets/snare.mp3');
+  cymbol = loadSound('/assets/cymbol.mp3');
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);
   bg.resize(width, height);
+
+  soundArray = [kick, snare, hat, cymbol];
 
   // creating buttons/sliders
   sequencerButton = createButton('Start/stop sequencer');
@@ -29,6 +33,10 @@ function setup() {
   sequencerSlider = createSlider(60, 200);
   sequencerSlider.position(width/2.3, height/1.3);
   sequencerSlider.size(80);
+
+  drumButton = createButton('Switch between notes and drums');
+  drumButton.position(width/200, height/1.5);
+  drumButton.mouseClicked(switchMode);
 
 
   //Sets the sizes for the various elements, will probably want these to change in the resize method. If things look weird start by changing here
@@ -42,8 +50,14 @@ function setup() {
   // initializing arrays
   spacing = (width / 6);
   for(let i = 0; i < noteAmt; i++){
-    noteCircles.push(new noteCircle(spacing * (i + 0.5), height/1.1, noteVals[i]))
+    noteCircles.push(new noteCircle(spacing * (i + 0.5), height/1.1, noteVals[i]));
   }
+
+  drumSpacing = width/4;
+  for(let i = 0; i < 4; i++){
+    drumCircles.push(new drumCircle(drumSpacing * (i + 0.5), height / 1.1, i));
+  }
+
   for(let i = 0; i < 16; i++){
     for(let j = 0; j < 10; j++){
       seqSquares.push(new sequencerSquare (((seqStart.x * i) + seqSizeX/4) - width/110, (seqStart.y * j) + seqSizeY/4, i, j))
@@ -58,7 +72,7 @@ function draw() {
   background(bg);
 
   let bpm = sequencerSlider.value();
-  console.log(bpm);
+  //console.log(bpm);
   textSize(32);
   fill(0);
   text(bpm + ' BPM', width/2.4, height/1.35);
@@ -94,17 +108,33 @@ function draw() {
   }
 
   seqHighlights.forEach((element) => element.display());
-  noteCircles.forEach((element) => element.run());
 
+  if(noteMode == 1){
+    noteCircles.forEach((element) => element.run());
+  }else{
+    drumCircles.forEach((element) => element.run());
+  }
+  
   // Code to make the sequencer play back, essentially "If the sequencer is going cycle through all the squares of the highlighted column and play whatever one has a note"
   if(sequencing == true){
     for (let i = 0; i < seqSquares.length; i++){
-      if(seqSquares[i].index.x == (metIndex - 1) && seqSquares[i].containsNote == true){
+      if(seqSquares[i].index.x == (metIndex - 1) && seqSquares[i].containsNote == true && seqSquares[i].index.y < 6){
         for(let j = 0; j < noteCircles.length; j++){
         if(5- seqSquares[i].index.y == j){
           noteCircles[j].oscilator.play();
           }
         }
+      }
+      if(seqSquares[i].index.x == (metIndex - 1) && seqSquares[i].containsNote == true && seqSquares[i].index.y > 5){
+        for(let j = 0; j < drumCircles.length; j++){
+          if(9- seqSquares[i].index.y == j){
+            if(newSquare == true){
+              drumCircles[j].sound.play();
+              newSquare = false;
+            }
+            
+            }
+          }
       }
     }
   }
@@ -132,9 +162,15 @@ function mousePressed(){
       noteCircles[i].oscilator.oscilator.start();
     }
     
-    if(mouseX > noteCircles[i].position.x - circSize/2 && mouseX < noteCircles[i].position.x + circSize/2 && mouseY > noteCircles[i].position.y - circSize/2 && mouseY < noteCircles[i].position.y + circSize/2){
+    if(mouseX > noteCircles[i].position.x - circSize/2 && mouseX < noteCircles[i].position.x + circSize/2 && mouseY > noteCircles[i].position.y - circSize/2 && mouseY < noteCircles[i].position.y + circSize/2 && noteMode == 1){
       console.log("Hi :) I'm " + i);
       noteCircles[i].oscilator.play();
+    }
+  }
+
+  for(let i = 0; i < drumCircles.length; i++){
+    if(mouseX > drumCircles[i].position.x - circSize/2 && mouseX < drumCircles[i].position.x + circSize/2 && mouseY > drumCircles[i].position.y - circSize/2 && mouseY < drumCircles[i].position.y + circSize/2 && noteMode == 2){
+      drumCircles[i].sound.play();
     }
   }
   console.log("You clicked me OwO");
@@ -142,12 +178,29 @@ function mousePressed(){
 
 function mouseDragged(){
   for(let i = 0; i < noteCircles.length; i++){
-    if(mouseX > noteCircles[i].position.x - circSize/2 && mouseX < noteCircles[i].position.x + circSize/2 && mouseY > noteCircles[i].position.y - circSize/2 && mouseY < noteCircles[i].position.y + circSize/2){
+    if(mouseX > noteCircles[i].position.x - circSize/2 && mouseX < noteCircles[i].position.x + circSize/2 && mouseY > noteCircles[i].position.y - circSize/2 && mouseY < noteCircles[i].position.y + circSize/2 && noteMode == 1){
       noteCircles[i].position.x = mouseX;
       noteCircles[i].position.y = mouseY;
       noteCircles[i].dragged = true;
 
-      //Want the code to check if we're on the sequencer column to run only if we are holding a circle
+      //Want the code to check if we're on the sequencer column to run only if we are holding a circle (this is what I'd need to edit if I want it to be editable on the fly) *****
+      for(let column of seqHighlights){
+        if(mouseX > column.position.x && mouseX < column.position.x + column.size.x && mouseY < column.position.y + column.size.y){
+            column.visible = true;
+          }else{
+            column.visible = false;
+          }
+      }
+    }
+  }
+
+  for(let i = 0; i < drumCircles.length; i++){
+    if(mouseX > drumCircles[i].position.x - circSize/2 && mouseX < drumCircles[i].position.x + circSize/2 && mouseY > drumCircles[i].position.y - circSize/2 && mouseY < drumCircles[i].position.y + circSize/2 && noteMode == 2){
+      drumCircles[i].position.x = mouseX;
+      drumCircles[i].position.y = mouseY;
+      drumCircles[i].dragged = true;
+
+      //Want the code to check if we're on the sequencer column to run only if we are holding a circle (this is what I'd need to edit if I want it to be editable on the fly) *****
       for(let column of seqHighlights){
         if(mouseX > column.position.x && mouseX < column.position.x + column.size.x && mouseY < column.position.y + column.size.y){
             column.visible = true;
@@ -174,8 +227,21 @@ function mouseReleased(){
         }
       }
      }
-  
     }
+
+    for(let i = 0; i < drumCircles.length; i++){
+      if (drumCircles[i].dragged == true){
+        for(let j = 0; j < seqHighlights.length; j++){
+          if (seqHighlights[j].visible == true){
+            for(let square of seqSquares){
+              if(square.index.x == j && (9 - square.index.y) == i){
+                square.containsNote = true;
+              }
+            }
+          }
+        }
+       }
+      }
 
   noteCircles.forEach((element) =>{     
     element.position.x = element.originalPosition.x;
@@ -183,19 +249,25 @@ function mouseReleased(){
     element.dragged = false;
   })
 
-  // I can't get this code to run when I double click, frustratingly
-  function doubleClicked(){
-    for (let square of seqSquares){
-      let squareRightSide = square.position.x + seqSizeX;
-      let squareBottomSide = square.position.y + seqSizeY;
-      // if the mouse is inside the square when it's double clicked that square loses its note
-      if(mouseX >= square.position.x && mouseX <= squareRightSide
-        && mouseY >= square.position.y && mouseY <= squareBottomSide){
-          square.containsNote = false;
-        }
-    }
-    console.log("double clicked!");
-  }
+  drumCircles.forEach((element) =>{     
+    element.position.x = element.originalPosition.x;
+    element.position.y = element.originalPosition.y;
+    element.dragged = false;
+  })
+
+  // // I can't get this (or any) code to run when I double click, frustratingly
+  // function doubleClicked(){
+  //   for (let square of seqSquares){
+  //     let squareRightSide = square.position.x + seqSizeX;
+  //     let squareBottomSide = square.position.y + seqSizeY;
+  //     // if the mouse is inside the square when it's double clicked that square loses its note
+  //     if(mouseX >= square.position.x && mouseX <= squareRightSide
+  //       && mouseY >= square.position.y && mouseY <= squareBottomSide){
+  //         square.containsNote = false;
+  //       }
+  //   }
+  //   console.log("double clicked!");
+  // }
 
 
   for(let column of seqHighlights){
@@ -216,7 +288,7 @@ function metronome(){
   }
   if (blink == true){
     metIndex++;
-    console.log(metIndex);
+    newSquare = true;
     blink = false;
   }
 }
@@ -234,17 +306,17 @@ function bpmConverter(number){
   milliseconds = (60000 / (number * 4));
 }
 
+function switchMode(){
+  if(noteMode == 1){
+    noteMode = 2;
+  }else{
+    noteMode = 1;
+  }
+}
+
+
 /* 
-Current bugs:
-- Main priority: making it so it works on a variety of different window sizes because right now it looks like shit on anything except side by side mode
-Start by making the sizing of the sequencer squares and highlights work a little better, that's 90% of it. They work good enough but they look a little ugly sometimes. 
-- If we want it to be resizable we'd just need to recall some of the global variable setting in the resize method. 
-
-- You can't edit it on the fly because of the way the highlighting works. I could probably patch it out pretty well
-
-
-Features I could add:
-- Drum samples for the lower 4 (kick, snare, hi hat and cymbol)
-https://editor.p5js.org/p5/sketches/Sound:_Load_and_Play_Sound
-- A button to erase all the notes (shouldn't be that hard to add)
+Next steps:
+- Clean up formatting/make resizable
+- Add reset button
 */

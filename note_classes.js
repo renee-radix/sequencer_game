@@ -1,3 +1,28 @@
+class drumCircle{
+  constructor(x, y, index){
+    this.index = index;
+    this.sound = soundArray[index];
+    this.size = circSize;
+    this.position = createVector(x, y);
+    this.originalPosition = createVector(this.position.x, this.position.y);
+    // notes are grayscale so just a single number between 0 and 255
+    this.brightness = map(x, 0, width, 20, 255);
+    this.dragged = true;
+  }
+
+  run(){
+    noStroke();
+    fill(this.brightness);
+    ellipseMode(CENTER);
+    ellipse(this.position.x, this.position.y, this.size, this.size);
+  }
+
+  play(){
+    this.sound.play();
+  }
+}
+
+
 class noteCircle{
     constructor(x, y, note){
       this.size = circSize;
@@ -40,3 +65,4 @@ class noteCircle{
     this.envelope.setRange(1, 0);
     }
   }
+

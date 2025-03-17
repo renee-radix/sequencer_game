@@ -27,6 +27,14 @@ class sequencerSquare{
       fill(noteColor, 100, noteCircles[5 - this.index.y].brightness);
       ellipse(this.position.x + circleOffset, this.position.y + circleOffset, this.size.x/1.5, this.size.y/1.5)
     }
+
+    if (this.containsNote == true && this.index.y > 5){
+      ellipseMode(CORNER);
+      let circleOffset = this.size.x/7;
+      noStroke();
+      fill(drumCircles[9-this.index.y].brightness);
+      ellipse(this.position.x + circleOffset, this.position.y + circleOffset, this.size.x/1.5, this.size.y/1.5)
+    }
   }
 }
 
