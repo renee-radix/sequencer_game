@@ -61,7 +61,7 @@ class noteCircle{
   class noteEnvelope{
     constructor(){
     this.envelope = new p5.Env();
-    this.envelope.setADSR(0.001, 0.5, 0.2, 0.5);
+    this.envelope.setADSR(0.01, 0.5, 0.2, 0.5);
     this.envelope.setRange(1, 0);
     }
   }

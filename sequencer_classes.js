@@ -10,6 +10,7 @@ class sequencerSquare{
     }
     this.selected = false;
     this.containsNote = false;
+    this.newSquare = true;
   }
 
   display(){

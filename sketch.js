@@ -8,8 +8,9 @@ let seqSquares = [], seqHighlights = [], seqOn = true;
 let bg;
 let time, previousTime = 0, interval, blink = false, milliseconds = 500, metIndex = 0, sequencing = false;
 let sequencerButton, sequencerSlider, resetButton, drumButton;
-let noteMode = 2; // 1 for the notes, 2 for the drum sounds
+let noteMode = 1; // 1 for the notes, 2 for the drum sounds
 let newSquare = true;
+let dragging = false;
 
 //loading the background
 function preload(){
@@ -35,8 +36,12 @@ function setup() {
   sequencerSlider.size(80);
 
   drumButton = createButton('Switch between notes and drums');
-  drumButton.position(width/200, height/1.5);
+  drumButton.position(width/200, height/1.45);
   drumButton.mouseClicked(switchMode);
+
+  resetButton = createButton('Reset sequencer');
+  resetButton.position(width/200, height/1.35);
+  resetButton.mouseClicked(reset);
 
 
   //Sets the sizes for the various elements, will probably want these to change in the resize method. If things look weird start by changing here
@@ -128,9 +133,9 @@ function draw() {
       if(seqSquares[i].index.x == (metIndex - 1) && seqSquares[i].containsNote == true && seqSquares[i].index.y > 5){
         for(let j = 0; j < drumCircles.length; j++){
           if(9- seqSquares[i].index.y == j){
-            if(newSquare == true){
+            if(seqSquares[i].newSquare == true){
               drumCircles[j].sound.play();
-              newSquare = false;
+              seqSquares[i].newSquare = false;
             }
             
             }
@@ -163,7 +168,6 @@ function mousePressed(){
     }
     
     if(mouseX > noteCircles[i].position.x - circSize/2 && mouseX < noteCircles[i].position.x + circSize/2 && mouseY > noteCircles[i].position.y - circSize/2 && mouseY < noteCircles[i].position.y + circSize/2 && noteMode == 1){
-      console.log("Hi :) I'm " + i);
       noteCircles[i].oscilator.play();
     }
   }
@@ -173,8 +177,7 @@ function mousePressed(){
       drumCircles[i].sound.play();
     }
   }
-  console.log("You clicked me OwO");
-}
+} 
 
 function mouseDragged(){
   for(let i = 0; i < noteCircles.length; i++){
@@ -182,6 +185,7 @@ function mouseDragged(){
       noteCircles[i].position.x = mouseX;
       noteCircles[i].position.y = mouseY;
       noteCircles[i].dragged = true;
+      dragging = true;
 
       //Want the code to check if we're on the sequencer column to run only if we are holding a circle (this is what I'd need to edit if I want it to be editable on the fly) *****
       for(let column of seqHighlights){
@@ -255,25 +259,24 @@ function mouseReleased(){
     element.dragged = false;
   })
 
-  // // I can't get this (or any) code to run when I double click, frustratingly
-  // function doubleClicked(){
-  //   for (let square of seqSquares){
-  //     let squareRightSide = square.position.x + seqSizeX;
-  //     let squareBottomSide = square.position.y + seqSizeY;
-  //     // if the mouse is inside the square when it's double clicked that square loses its note
-  //     if(mouseX >= square.position.x && mouseX <= squareRightSide
-  //       && mouseY >= square.position.y && mouseY <= squareBottomSide){
-  //         square.containsNote = false;
-  //       }
-  //   }
-  //   console.log("double clicked!");
-  // }
-
-
+  dragging = false;
   for(let column of seqHighlights){
     column.visible = false;
   }
 }
+
+  function doubleClicked(){
+    for (let square of seqSquares){
+      let squareRightSide = square.position.x + seqSizeX;
+      let squareBottomSide = square.position.y + seqSizeY;
+      // if the mouse is inside the square when it's double clicked that square loses its note
+      if(mouseX >= square.position.x && mouseX <= squareRightSide
+        && mouseY >= square.position.y && mouseY <= squareBottomSide){
+          square.containsNote = false;
+        }
+    }
+  }
+
 
 function timeCheck(interval){
   if (time - previousTime >= interval){
@@ -288,6 +291,7 @@ function metronome(){
   }
   if (blink == true){
     metIndex++;
+    seqSquares.forEach((square) => square.newSquare = true);
     newSquare = true;
     blink = false;
   }
@@ -314,9 +318,15 @@ function switchMode(){
   }
 }
 
+function reset(){
+  seqSquares.forEach((square) => square.containsNote = false);
+}
+
 
 /* 
 Next steps:
 - Clean up formatting/make resizable
-- Add reset button
+- Can't play multiple drum sounds at once currently, probably because of the new square boolean. I'd probably want one of those per sound playback
+
+- Sometimes adding notes is a lil buggy
 */
