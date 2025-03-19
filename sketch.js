@@ -15,10 +15,10 @@ let dragging = false;
 //loading the background
 function preload(){
   bg = loadImage('wavy_lines.jpg')
-  kick = loadSound('/assets/kick.mp3');
-  hat = loadSound('/assets/hat.mp3');
-  snare = loadSound('/assets/snare.mp3');
-  cymbol = loadSound('/assets/cymbol.mp3');
+  kick = loadSound('assets/kick.mp3');
+  hat = loadSound('assets/hat.mp3');
+  snare = loadSound('assets/snare.mp3');
+  cymbol = loadSound('assets/cymbol.mp3');
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);
