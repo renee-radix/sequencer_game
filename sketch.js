@@ -30,6 +30,13 @@ function setup() {
   sequencerButton = createButton('Start/stop sequencer');
   sequencerButton.position(width/1.2, height/1.5);
   sequencerButton.mouseClicked(toggleSequencer);
+  // this is how you edit css style on the components created in the sketch. mess around with this if you want to
+  sequencerButton.style('background-color:lightGreen;')
+  sequencerButton.style('font-family: Arial;')
+  sequencerButton.style('border-style: hidden;')
+  sequencerButton.style('font-weight: Bold;')
+  sequencerButton.style('border-radius: 12px;')
+
 
   sequencerSlider = createSlider(60, 200);
   sequencerSlider.position(width/2.3, height/1.3);
@@ -38,10 +45,20 @@ function setup() {
   drumButton = createButton('Switch between notes and drums');
   drumButton.position(width/200, height/1.45);
   drumButton.mouseClicked(switchMode);
+  drumButton.style('background-color: #2b70a5 ;');
+  drumButton.style('font-family: Arial;');
+  drumButton.style('border-style: hidden;');
+  drumButton.style('font-weight: Bold;');
+  drumButton.style('border-radius: 12px;')
 
   resetButton = createButton('Reset sequencer');
   resetButton.position(width/200, height/1.35);
   resetButton.mouseClicked(reset);
+  resetButton.style('background-color: #bc1d0f;');
+  resetButton.style('font-family: Arial;');
+  resetButton.style('border-style: hidden;');
+  resetButton.style('font-weight: Bold;');
+  resetButton.style('border-radius: 12px;')
 
 
   //Sets the sizes for the various elements, will probably want these to change in the resize method. If things look weird start by changing here
@@ -71,6 +88,8 @@ function setup() {
   for(let i = 0; i < 16; i++){
     seqHighlights.push(new sequencerHighlight(i, seqSizeX, seqSizeY * 13));
   }
+  console.log("Width:" + width);
+  console.log("Height: " + height);
 }
 
 function draw() {
@@ -94,6 +113,8 @@ function draw() {
   }
 
 
+  // If I want to make this work with the squares being different sizes I'd probably want the line position
+  // to depend on the sequencer square size etc. 
   fill(0);
   stroke(50);
   strokeWeight(4);
@@ -147,15 +168,51 @@ function draw() {
 
 function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
-  // Deletes and reforms the note circles if the window is resized (can't have the note circles form in the draw loop otherwise it bugs out)
-  noteCircles.splice(0, noteCircles.length);
+  // Reassigning the variables that depend on the canvas size
   spacing = (width / 6);
   circSize = height/8;
+  seqSizeX = width/20;
+  seqSizeY = height/20;
+  seqStart = createVector(width/16, height/16);
+  drumSpacing = width/4;
+
+  // Deletes and reforms the note and drum circles if the window is resized (can't have the note circles form in the draw loop otherwise it bugs out)
+  noteCircles.splice(0, noteCircles.length);
+  drumCircles.splice(0, drumCircles.length);
   for(let i = 0; i < noteAmt; i++){
     noteCircles.push(new noteCircle(spacing * (i + 0.5), height/1.1, noteVals[i]));
   }
+  for(let i = 0; i < 4; i++){
+    drumCircles.push(new drumCircle(drumSpacing * (i + 0.5), height / 1.1, i));
+  }
+
+
+  seqSquares.splice(0, seqSquares.length);
+  seqHighlights.splice(0, seqHighlights.length);
+  for(let i = 0; i < 16; i++){
+    for(let j = 0; j < 10; j++){
+      seqSquares.push(new sequencerSquare (((seqStart.x * i) + seqSizeX/4) - width/110, (seqStart.y * j) + seqSizeY/4, i, j))
+    }
+  }
+  for(let i = 0; i < 16; i++){
+    seqHighlights.push(new sequencerHighlight(i, seqSizeX, seqSizeY * 13));
+  }
+
+  // Recall button.position
+  sequencerButton.position(width/1.2, height/1.5);
+  sequencerSlider.position(width/2.3, height/1.3);
+  drumButton.position(width/200, height/1.45);
+  resetButton.position(width/200, height/1.35);
 
   bg.resize(width, height);
+
+  /*
+  Also need to:
+  - Make sure that all the dependant variables for the sequencer squares, highlights etc. get re-written
+  - Delete all the drum circles and reform them
+  - Delete all the sequencer squares and reform them (will cause all the circle data to get erased unfortunately)
+
+  */
 
   // If I want to do this for the whole project I'd have to redraw the serquencer and reinitialize the values also, which is doable but would just take some time. 
 
@@ -325,8 +382,9 @@ function reset(){
 
 /* 
 Next steps:
-- Clean up formatting/make resizable
-- Can't play multiple drum sounds at once currently, probably because of the new square boolean. I'd probably want one of those per sound playback
+- Resizing works on the whole, but the squares look a little ugly when it's full screen. 
+If I'm changing this I also need to change where the lines line up. I could also shift everything down? But it'd be a headache. But maybe worth it since I want it to be something that looks good on a whole screen. 
+- Sometimes adding notes is a lil buggy (adding a single note will cause all the drum notes to get filled up)
 
-- Sometimes adding notes is a lil buggy
+- Do I want to replace the sine oscilators with saw waves? I think that'd sound cooler 
 */
