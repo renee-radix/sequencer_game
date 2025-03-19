@@ -43,7 +43,7 @@ class sequencerHighlight{
     // These are highlights that are meant to be on top of the sequencer when either a circle is hovering over the top or it's playing through it
     constructor(i, w, h){
       this.position = createVector(seqSquares[i * 10].position.x, seqSquares[0].position.y - (seqSizeX / 3.5)); // This will be the start point for the highlight (top X Y corner). i is the index that it gets fed, a number from 0 to 15
-      this.size = createVector(seqSizeX, seqSizeY * 13); // Width and height of the hightlight, stored in a vector for convenience (it will probably need to be destroyed and reformed again under window resize to make it all fit correctly)
+      this.size = createVector(seqSizeX, seqSizeY * 10); // Width and height of the hightlight, stored in a vector for convenience (it will probably need to be destroyed and reformed again under window resize to make it all fit correctly)
       this.visible = false;
     }
   
